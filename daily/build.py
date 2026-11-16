@@ -150,7 +150,7 @@ def page_day(d):
     body = f'''
 <header><p class="k">Glucose · ежедневный анализ · Instagram ҰБТ</p><h1>{human(date)}</h1>
 <p class="sub">Публикации {len(accs)} аккаунтов за сутки ({date}, время Алматы). Лайки и просмотры сняты {esc(d.get('measured_at',''))}; у свежих публикаций они ещё растут.</p>
-<p class="nav"><a href="../index.html">← все дни</a><a href="../../glucose-competitor-analysis/">недельный анализ</a></p></header>
+<p class="nav"><a href="../index.html">← все дни</a><a href="../../weekly/">недельный анализ</a></p></header>
 <div class="kpis">{''.join(kp)}</div>
 {f'<div class="out"><b>Главное за день:</b> {esc(notes.get("summary"))}</div>' if notes.get('summary') else ''}
 <section><h2>Прирост подписчиков за сутки</h2><p class="find">Разница замеров {esc(d.get('growth_from',''))} → {esc(d.get('growth_to',''))}.{' Полоса лидера обрезана — она намного длиннее.' if gr and gr[0]['growth'] > gcap else ''}</p>
@@ -178,7 +178,7 @@ def page_index(days):
         n = len(me.get('posts', [])); v = sum(1 for p in me.get('posts', []) if viral(p))
         g = me.get('growth'); summ = d.get('notes', {}).get('summary', '')
         rows.append(f'<a class="item" href="{d["date"]}/" style="text-decoration:none;color:inherit"><span class="chip">{d["date"][8:10]}.{d["date"][5:7]}</span><span class="t"><b>{human(d["date"])}</b><small>{esc(summ[:180])}</small></span><span class="m">Glucose: {n} публ. · {v} залет.<br>{sign(g) if g is not None else "—"} подп.</span></a>')
-    body = f'<header><p class="k">Glucose · Instagram ҰБТ</p><h1>Ежедневный анализ конкурентов</h1><p class="sub">Каждый день — публикации, залетевшее, просмотры и прирост подписчиков 20 аккаунтов за прошедшие сутки.</p><p class="nav"><a href="../glucose-competitor-analysis/">недельный анализ →</a></p></header><div class="list">{"".join(rows) or "<p class=empty>Пока нет дней.</p>"}</div>'
+    body = f'<header><p class="k">Glucose · Instagram ҰБТ</p><h1>Ежедневный анализ конкурентов</h1><p class="sub">Каждый день — публикации, залетевшее, просмотры и прирост подписчиков 20 аккаунтов за прошедшие сутки.</p><p class="nav"><a href="../weekly/">недельный анализ →</a></p></header><div class="list">{"".join(rows) or "<p class=empty>Пока нет дней.</p>"}</div>'
     return f'<!doctype html>\n<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="claude:viewport-fit-sides" content="cover"><title>Glucose · ежедневный анализ</title><style>{CSS}</style></head><body><div class="wrap">{body}</div></body></html>\n'
 
 def main():

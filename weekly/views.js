@@ -1,0 +1,2 @@
+// Открыть https://www.instagram.com/<аккаунт>/reels/, прокрутить колесом, затем вставить — просмотры с плиток в localStorage.wkv
+const g={};document.querySelectorAll('main a[href*="/reel/"]').forEach(a=>{const c=a.getAttribute('href').split('/reel/')[1].replace('/','');g[c]=a.innerText.trim()});let all={};try{all=JSON.parse(localStorage.wkv||'{}')}catch(e){};Object.assign(all,g);localStorage.wkv=JSON.stringify(all);location.pathname.split('/')[1]+': '+Object.keys(g).length
