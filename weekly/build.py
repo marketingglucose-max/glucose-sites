@@ -41,31 +41,31 @@ def page(d):
         return f'<div class="item{cls}"><span class="chip">{"рилс" if p["t"]=="reel" else "пост"} · {dshort(p["d"])}</span><span class="t"><a href="{url(p)}" target="_blank" rel="noopener">@{esc(a)}</a><small>{esc((p.get("cap") or "без подписи")[:140])}</small></span><span class="m">{m}</span></div>'
 
     kp = [f'<div class="kpi dark"><b>{me["n"]}</b><span>публикаций Glucose ({me["np"]} постов, {me["nr"]} рилсов) · {rank_act}-е место из {len(open_accs)}</span></div>',
-          f'<div class="kpi"><b>{sign(me["growth"])}</b><span>подписчиков за неделю · {rank_gr}-е место из {len(gr)} (неделей раньше {sign(gp["growth"])}, {gp["growth_rank"]}-е)</span></div>',
+          f'<div class="kpi"><b>{sign(me["growth"])}</b><span>подписчиков за {esc(d['growth_from'][:5])}→{esc(d['growth_to'][:5])} · {rank_gr}-е место из {len(gr)} (неделей раньше {sign(gp["growth"])}, {gp["growth_rank"]}-е)</span></div>',
           f'<div class="kpi"><b>{len(me["vir"])} из {me["n"]}</b><span>публикаций Glucose залетели ({round(100*len(me["vir"])/me["n"])}%, в нише {round(100*nvir/total)}%)</span></div>']
     if my_best: kp.append(f'<div class="kpi"><b>{fk(my_best[2]["views"])}</b><span>лучший рилс Glucose · {my_best[0]}-е место из {len(reels)}</span></div>')
 
     whyhtml = ''.join(f'<div><b>@{esc(a["a"])} · {sign(a["growth"])}</b>{esc(why.get(a["a"], "—"))}</div>' for a in gr[:3])
     # growth table with previous week
-    gtab = '<div class="tbl"><table><tr><th>Аккаунт</th><th>Подписчиков 16.11</th><th>Эта неделя</th><th>Прошлая неделя</th><th>Темп, %</th></tr>' + ''.join(
+    gtab = f'<div class="tbl"><table><tr><th>Аккаунт</th><th>Подписчиков {d.get("followers_date","16.11")}</th><th>Эта неделя</th><th>Прошлая неделя</th><th>Темп, %</th></tr>' + ''.join(
         f'<tr{" style=\"font-weight:700\"" if a["a"]==ME else ""}><td>@{esc(a["a"])}</td><td>{fnum(a["followers"])}</td><td>{sign(a["growth"])}</td><td>{sign(a["growth_prev"]) if a.get("growth_prev") is not None else "—"}</td><td>{f"{100*a['growth']/(a['followers']-a['growth']):+.2f}".replace('.', ',').replace('-', '−')}%</td></tr>'
         for a in gr) + '</table></div>'
     # Glucose daily growth
     gd = d['glucose_daily_followers']; ks = sorted(gd)
-    gdrows = ''.join(f'<tr><td>{dshort(ks[i-1])} → {dshort(ks[i])}</td><td>{sign(gd[ks[i]]-gd[ks[i-1]])}</td><td>{esc(", ".join(f"{"рилс" if p["t"]=="reel" else "пост"} {fk(p["views"]) + " просм." if p.get("views") else str(p["likes"]) + " лайков"}" for p in sorted([p for p in me["pubs"] if p["d"]==ks[i-1]], key=lambda p: -(p.get("views") or p["likes"] or 0))[:3]))}</td></tr>' for i in range(1, len(ks)))
-    gdtab = f'<div class="tbl"><table><tr><th>Сутки (замер ~12:00)</th><th>Прирост</th><th>Самые сильные публикации дня старта</th></tr>{gdrows}</table></div>'
+    gdrows = ''.join(f'<tr><td>{dshort(ks[i-1])} → {dshort(ks[i])}</td><td>{sign(gd[ks[i]]-gd[ks[i-1]])}</td><td>{esc(", ".join(f"{"рилс" if p["t"]=="reel" else "пост"} {fk(p["views"]) + " просм." if p.get("views") else str(p["likes"]) + " лайков"}" for p in sorted([p for p in me["pubs"] if ks[i-1] <= p["d"] < ks[i]], key=lambda p: -(p.get("views") or p["likes"] or 0))[:3]))}</td></tr>' for i in range(1, len(ks)))
+    gdtab = f'<div class="tbl"><table><tr><th>Сутки (замер ~12:00)</th><th>Прирост</th><th>Самые сильные публикации за эти сутки</th></tr>{gdrows}</table></div>'
     # week over week
     vs_me = [p['views'] for p in me['pubs'] if p['t'] == 'reel' and p.get('views')]
     wow = [('Публикаций', f'{gp["n"]} ({gp["np"]} п. + {gp["nr"]} р.)', f'{me["n"]} ({me["np"]} п. + {me["nr"]} р.)', pct(me['n'], gp['n'])),
            ('Залетело', f'{gp["vir"]} ({round(100*gp["vir"]/gp["n"])}%)', f'{len(me["vir"])} ({round(100*len(me["vir"])/me["n"])}%)', pct(len(me['vir']), gp['vir'])),
            ('Медиана просмотров рилса', fk(gp['median_views']), fk(me['vmed']), pct(me['vmed'], gp['median_views'])),
            ('Лучший рилс', fk(gp['best_views']), fk(max(vs_me)), pct(max(vs_me), gp['best_views'])),
-           ('Прирост подписчиков (замеры)', sign(gp['growth']), sign(me['growth']), pct(me['growth'], gp['growth']))]
+           ('Прирост подписчиков (замеры; периоды см. выше)', sign(gp['growth']), sign(me['growth']), pct(me['growth'], gp['growth']))]
     lab = {'gained': 'Пришло подписчиков', 'lost': 'Ушло подписчиков', 'reach': 'Охват аккаунта', 'views': 'Просмотры аккаунта', 'reels_views': 'Просмотры рилсов', 'interactions': 'Взаимодействия', 'stories': 'Сторис'}
     for k, l in lab.items():
         v = mc.get(k) or {}
         if v.get('cur') is not None: wow.append((l + ' в сутки · Metricool', fnum(v['prev']), fnum(v['cur']), pct(v['cur'], v['prev'])))
-    wtab = '<div class="tbl"><table><tr><th>Glucose</th><th>02–08.11</th><th>09–15.11</th><th>Изменение</th></tr>' + ''.join(f'<tr><td>{a}</td><td>{b}</td><td><b>{c}</b></td><td>{e}</td></tr>' for a, b, c, e in wow) + '</table></div>'
+    wtab = f'<div class="tbl"><table><tr><th>Glucose</th><th>{d.get("prev_label","02–08.11")}</th><th>{d.get("cur_label","09–15.11")}</th><th>Изменение</th></tr>' + ''.join(f'<tr><td>{a}</td><td>{b}</td><td><b>{c}</b></td><td>{e}</td></tr>' for a, b, c, e in wow) + '</table></div>'
     place = [('Публикаций', str(me['n']), f'{rank_act} из {len(open_accs)}', f"@{act[0]['a']} — {act[0]['n']}"),
              ('Прирост подписчиков', sign(me['growth']), f'{rank_gr} из {len(gr)}', f"@{gr[0]['a']} — {sign(gr[0]['growth'])}"),
              ('Доля залетевших', f"{round(100*len(me['vir'])/me['n'])}%", f"{1+sum(len(a['vir'])/a['n'] > len(me['vir'])/me['n'] for a in share)} из {len(share)}", f"@{share[0]['a']} — {round(100*len(share[0]['vir'])/share[0]['n'])}%"),
@@ -73,13 +73,19 @@ def page(d):
              ('Лучший рилс', fk(my_best[2]['views']), f'{my_best[0]} из {len(reels)}', f"@{reels[0][0]} — {fk(reels[0][1]['views'])}")]
     ptab = '<div class="tbl"><table><tr><th>Показатель</th><th>Glucose</th><th>Место</th><th>Лидер</th></tr>' + ''.join(f'<tr><td>{a}</td><td><b>{b}</b></td><td>{c}</td><td>{esc(e)}</td></tr>' for a, b, c, e in place) + '</table></div>'
     blocked = [a['a'] for a in accs if a.get('blocked')]
+    miss = {}
+    for a, p in allp:
+        if p['t'] == 'reel' and not p.get('views'): miss[a] = miss.get(a, 0) + 1
+    miss_note = (f" Без просмотров остались {sum(miss.values())} рилсов (" + ', '.join(f"{v} у @{k}" for k, v in sorted(miss.items(), key=lambda x: -x[1])) + ") — их не было на вкладке Reels.") if miss else ''
+    unav = d.get('unavailable') or {b: 'закрыл нам доступ' for b in blocked}
+    unav_note = ''.join(f" @{k}: {v} — публикаций и прироста за неделю нет." for k, v in unav.items())
     body = f'''
 <header><p class="k">Glucose · недельный анализ · Instagram ҰБТ</p><h1>Неделя {period(d["week"], d["end"])}</h1>
-<p class="sub">Публикации {len(open_accs)} аккаунтов с 09.11 по 15.11 (время Алматы). Лайки и просмотры сняты {esc(d["measured_at"])}. Прирост подписчиков — замеры {esc(d["growth_from"])} → {esc(d["growth_to"])}.</p>
+<p class="sub">Публикации {len(open_accs)} аккаунтов за {d.get('cur_label','09.11–15.11')} (время Алматы). Лайки и просмотры сняты {esc(d["measured_at"])}. Прирост подписчиков — замеры {esc(d["growth_from"])} → {esc(d["growth_to"])}.</p>
 <p class="nav"><a href="../index.html">← все недели</a><a href="../../daily/">ежедневный анализ</a><a href="../../glucose-competitor-analysis/">презентация 02–08.11</a></p></header>
 <div class="kpis">{''.join(kp)}</div>
 <div class="out"><b>Главное за неделю:</b> {esc(notes["summary"])}</div>
-<section><h2>Прирост подписчиков за неделю</h2><p class="find">{' Полоса лидера обрезана — она намного длиннее.' if gr[0]['growth'] > gcap else ''}</p>
+<section><h2>Прирост подписчиков за неделю</h2><p class="find">{esc(d.get('growth_note',''))}{' Полоса лидера обрезана — она намного длиннее.' if gr[0]['growth'] > gcap else ''}</p>
 {bars(gr, lambda a: max(0, a['growth']), None, maxv=gcap, fmt=lambda a: sign(a['growth']))}
 <h2>Топ-3 и за счёт чего</h2><div class="why">{whyhtml}</div>
 <h2>Сравнение с прошлой неделей</h2>{gtab}</section>
@@ -98,7 +104,7 @@ def page(d):
 <h2>Glucose по дням</h2>{gdtab}</section>
 <section><h2>Место Glucose</h2>{ptab}</section>
 <div class="out"><b>Что взять в работу:</b> {esc(notes["todo"])}</div>
-<footer>Источник: Instagram (страницы публикаций и вкладки Reels), ежедневные замеры подписчиков около 12:00 по Алматы, Metricool для Glucose. Совместные публикации засчитаны каждому соавтору. Без просмотров остались 8 рилсов (5 у JUZ40, 2 у Tarih mektebi, 1 у Zerdeli) — их не было на вкладке Reels.{f" @{', @'.join(blocked)} закрыл нам доступ — его публикаций и прироста за неделю нет." if blocked else ''}</footer>'''
+<footer>Источник: Instagram (страницы публикаций и вкладки Reels), ежедневные замеры подписчиков около 12:00 по Алматы, Metricool для Glucose. Совместные публикации засчитаны каждому соавтору. {miss_note}{unav_note}</footer>'''
     return f'<!doctype html>\n<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="claude:viewport-fit-sides" content="cover"><title>Glucose · неделя {dshort(d["week"])}–{dshort(d["end"])}</title><style>{CSS}</style></head><body><div class="wrap">{body}</div></body></html>\n'
 
 def index(weeks):

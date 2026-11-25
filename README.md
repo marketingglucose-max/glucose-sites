@@ -11,4 +11,4 @@
 ## Недельный анализ — weekly/
 - `weekly/collect.js`, `weekly/views.js` — сборщики для браузера (неделя FROM..TO; прокрутка колесом мыши перед запуском).
 - `weekly/data/raw-<понедельник>.json` — сырые публикации, `followers.json` — замеры, `notes-<понедельник>.json` — выводы.
-- `python3 weekly/make_week.py && python3 weekly/build.py` → `weekly/<понедельник>/index.html` и `weekly/index.html`.
+- `python3 weekly/make_week.py <понедельник> && python3 weekly/build.py` (настройки недели — CONFIG в make_week.py; Metricool — data/metricool.json) → `weekly/<понедельник>/index.html` и `weekly/index.html`.
